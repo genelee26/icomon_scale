@@ -189,7 +189,7 @@ class IcomonManager:
                 if weight_ent:
                     weight_ent.update_val(round(weight_kg, 2))
                 if status_ent:
-                    status_ent.update_val(f"称重中: {weight_kg:.2f}kg")
+                    status_ent.update_val("称重中")
 
                 self._stable_buffer.append(weight_kg)
                 if len(self._stable_buffer) > 3:
@@ -308,7 +308,7 @@ class IcomonManager:
             "bmr": bmr,
             "physique": physique,
             "impedance": round(impedance, 1),
-            "status": f"已锁定: {weight:.2f}kg",
+            "status": "已锁定",
         }
         for key, val in updates.items():
             ent = entities.get(key)
