@@ -1,4 +1,9 @@
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+    RestoreSensor,
+)
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.const import UnitOfMass, EntityCategory, PERCENTAGE
 from homeassistant.util import slugify
@@ -41,7 +46,12 @@ def _create_user_sensors(mac, user_name, slug):
     }
 
 
-class BaseSensor(SensorEntity):
+class BaseSensor(RestoreSensor):
+    # Subclasses with transient state (e.g. measurement progress strings)
+    # should set this to False so they reset to unknown across restarts
+    # instead of resurrecting a stale "称重中" / "等待上秤..." value.
+    _restore_state = True
+
     def __init__(self, mac, user_name, slug):
         self._mac = mac
         self._user_name = user_name
@@ -63,6 +73,23 @@ class BaseSensor(SensorEntity):
         self._state = val
         if self.hass and self.entity_id:
             self.schedule_update_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        # On-demand measurement devices have no value between sessions; without
+        # this restoration each HA restart resets state to None → HA statistics
+        # module drops the entity from its tracking list and stops generating
+        # hourly aggregates until the next manual measurement.
+        await super().async_added_to_hass()
+        if not self._restore_state:
+            return
+        if self.state_class is not None:
+            last_data = await self.async_get_last_sensor_data()
+            if last_data is not None and last_data.native_value is not None:
+                self._state = last_data.native_value
+                return
+        last_state = await self.async_get_last_state()
+        if last_state is not None and last_state.state not in (None, "unknown", "unavailable", ""):
+            self._state = last_state.state
 
 
 class WeightSensor(BaseSensor):
@@ -202,6 +229,8 @@ class PhysiqueSensor(BaseSensor):
 
 
 class StatusSensor(BaseSensor):
+    _restore_state = False
+
     def __init__(self, mac, user_name, slug):
         super().__init__(mac, user_name, slug)
         self._attr_name = f"{user_name} 测量状态"
