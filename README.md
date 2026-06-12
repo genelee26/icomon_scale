@@ -1,5 +1,7 @@
 # Icomon 智能体脂秤 - Home Assistant 集成
 
+[![Buy Me A Coffee](https://img.shields.io/badge/请我喝杯咖啡-Buy_Me_A_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/genelee26)
+
 通过 BLE Proxy 连接 Icomon (沃莱) 体脂秤，支持多用户按需测量，15 项体成分指标。
 
 ## 功能
@@ -45,6 +47,19 @@
 | 包头 | byte[0] | 固定 0xAC |
 | 体重 | byte[3:5] | 24 位大端整数，`(val - 9175040) / 1000` = kg |
 | 阻抗 | byte[17:18] | 大端 16 位，`raw / 5.532` = Ω |
+
+## 赞赏支持
+
+纯业余时间做着玩的开源项目，免费、而且会一直免费。要是它帮你省了心、或者让你会心一笑，
+欢迎请我喝杯咖啡 ☕ —— 纯属鼓励，绝不影响任何功能。
+
+[![Buy Me A Coffee](https://img.shields.io/badge/请我喝杯咖啡-Buy_Me_A_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/genelee26)
+
+国内的同道也可以微信赞赏，扫下面这个码就行：
+
+<img src="images/wechat_pay.png" width="280" alt="微信赞赏码">
+
+谢谢每一位同道中人的鼓励 🙏
 
 ## License
 
